@@ -31,8 +31,11 @@ int main(){
 			curstat.test_str = generate_random_string(option_slct);
 			curstat.test_str_size = TEST_STR_SIZE;
 			werase(welcome_menu.window_p);
-			test_string(&curstat);
-			display_results(&curstat);
+			int fincode = test_string(&curstat);
+
+			if(fincode == 0){
+				display_results(&curstat);
+			}
 
 			prev_slct = option_slct;
 		}

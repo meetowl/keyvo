@@ -1,6 +1,7 @@
 #include <sys/time.h>
 
 #include "stat.h"
+#include "text.h"
 
 void backspace_character(struct window *op_window, char rechar){
 	uint8_t y, x;
@@ -19,7 +20,22 @@ void backspace_character(struct window *op_window, char rechar){
 	}
 }
 
-void test_string(struct keystat *instat){
+int isbackspace(char in){
+	// Most backspace character codes
+	return (in == 263 || in == 127 || in == 8 || in == 7);
+}
+
+int isregenkey(char in){
+	// Ctrl-R code
+	return (in == 18);
+}
+
+int isquitkey(char in){
+	// Ctrl-Q keycode
+	return (in == 24);
+}
+
+int test_string(struct keystat *instat){
 	// Set all backspace to 0
 	for(int i = 0; i < sizeof(instat->bs); i++){
 		instat->bs[i] = 0;
@@ -35,14 +51,15 @@ void test_string(struct keystat *instat){
 
 	// Read the first character and initialize timings
 	char char_in = getch();
-	instat->char_input[0] = instat->entered_str[0] = char_in;
+	instat->char_input[0] = char_in;
+	instat->entered_str[0] = char_in;
 	redraw_char(&typing_window, *instat->test_str, (char_in == *instat->test_str));
+
 	// Everything to do with timing keypresses
 	struct timeval now_tv;
 	gettimeofday(&now_tv, 0);
 	uint64_t st_t = (now_tv.tv_sec*1000) + (now_tv.tv_usec/1000);
 	instat->timings[0] = 0;
-	printw("%d", instat->timings[0]);
 
 	wrefresh(typing_window.window_p);
 
@@ -53,32 +70,45 @@ void test_string(struct keystat *instat){
 
 	while(*(instat->test_str+i) != '\0'){
 		char_in = getch();
-		
-		// Backspace (emacs keeps changing which char it wants to use)
-		if(char_in == 263 || char_in == 127 || char_in == 8 || char_in == 7){
-			if(i != 0){
-				i--;
-				backspace_character(&typing_window, *(instat->test_str+i));
-				
-				// Don't mark as bs if correct initially
-				if(instat->char_input[i] != *(instat->test_str+i)){ 
-					instat->bs[i]++; 
-				}
-			}
-		}else{
+
+		// Within the character input range
+		if (char_in >= 32 && char_in <= 126) {
 			redraw_char(&typing_window, *(instat->test_str+i),	\
 						(char_in == *(instat->test_str+i)));
 
 			// Get current time and record it
 			gettimeofday(&now_tv, 0);
-			instat->timings[i] = (now_tv.tv_sec*1000 + now_tv.tv_usec/1000) - st_t;
+			instat->timings[i] = (now_tv.tv_sec*1000 + now_tv.tv_usec/1000)	\
+				- st_t;
+
+			// Update the entered string
+			instat->char_input[i] = char_in;
+			
 			i++;
+		} else if (isbackspace(char_in) && i > 0) {
+			i--;
+			backspace_character(&typing_window, *(instat->test_str+i));
+				
+			// Don't mark as bs if correct initially
+			if(instat->char_input[i] != *(instat->test_str+i)){ 
+				instat->bs[i]++; 
+			}
+		/* } else if (isregenkey(char_in)) { */
+		/* 	printw("regenerating. "); */
+		} else if (isquitkey(char_in)) {
+			return 1;
 		}
-		// Character entry book keeping
-		instat->char_input[i] = char_in;
+		
+
+		// Update the entire entered string
 		instat->entered_str[entr_i] = char_in;
-		entr_i++; 
+		entr_i++;
+		
 
 		wrefresh(typing_window.window_p);
+
+
 	}
+	return 0;
+
 }

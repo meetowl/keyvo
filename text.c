@@ -54,7 +54,7 @@ void print_option_menu(struct window *op_window, char prev_slct){
 void print_typing_string(struct window *op_window){
 	const char line_0[] = "Keyvo (by meetowl)";
 	const char line_1[] = "Type the characters.";
-	const char line_2[] = "F1 to return to menu | F3 to regenerate string";
+	const char line_2[] = "Ctrl-X to return to main menu";
 
 	WINDOW *win = op_window->window_p;
 	int win_l=op_window->length;
@@ -144,9 +144,8 @@ char *generate_random_string(int gen_num){
 	return rdm_str;
 }
 
-
-void print_results(struct window *op_window, int t, int avg_t, int wpm, int acc, \
-				   int mstks, int mstks_fx){
+void print_results(struct window *op_window, int t, int avg_t, int wpm, \
+				   double acc, double acc_fx, int mstks, int mstks_fx){
 	const char line0[] = "Test finished!";
 
 	WINDOW *win = op_window->window_p;
@@ -155,10 +154,11 @@ void print_results(struct window *op_window, int t, int avg_t, int wpm, int acc,
 	mvwprintw(win, 0, (win_l - strlen(line0))/2, "%s", line0);
 	mvwprintw(win, 1, 0, "Avg. Time / character: %10dms", avg_t);
 	mvwprintw(win, 2, 0, "Time taken:            %10d seconds", t);
-	/* mvwprintw(win, 2, 0, "Words per minute: %10d", wpm); */
-	/* mvwprintw(win, 3, 0, "Accuracy:         %10d\%", acc); */
-	/* mvwprintw(win, 4, 0, "Mistakes total:   %10d", mstks); */
-	/* mvwprintw(win, 5, 0, "Mistakes fixed:   %10d", mstks_fx); */
+	mvwprintw(win, 3, 0, "Words per minute:      %10d", wpm);
+	mvwprintw(win, 4, 0, "Accuracy:              %10.2f%%", acc);
+	mvwprintw(win, 5, 0, "Accuracy fixed:        %10.2f%%", acc_fx);
+	mvwprintw(win, 6, 0, "Mistakes total:        %10d", mstks);
+	mvwprintw(win, 7, 0, "Mistakes fixed:        %10d", mstks_fx);
 	
 	show_window(op_window);
 }
