@@ -12,8 +12,6 @@ struct keystat{
 	int bs[TEST_STR_SIZE];
 };
 
-int getavgms(struct keystat *stats);
-
 void display_results(struct keystat *stats);
 
 #endif

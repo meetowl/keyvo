@@ -3,8 +3,11 @@
 
 #include "window.h"
 
-/* Test string size */ 
 #define TEST_STR_SIZE 128
+//#define SHORT_EXAMPLE
+//#define TEST_STR_SIZE 10
+#define AVG_WORD_SIZE 8
+
 void set_fonts(int theme);
 
 void print_option_menu(struct window *op_window, char prev_slct);
@@ -18,7 +21,6 @@ void redraw_char(struct window *op_window, const char test_char,	\
 
 char *generate_random_string(int gen_num);
 
-void print_results(struct window *op_window, int t, int avg_t, int wpm, int acc, \
-				   int mstks, int mstks_fx);
-
+void print_results(struct window *op_window, int t, int avg_t, int wpm, \
+				   double acc, double acc_fx, int mstks, int mstks_fx);
 #endif
