@@ -5,6 +5,8 @@
 int main(){
 	start_curses();
 
+	
+	
 	struct window welcome_menu;
 	configure_window(&welcome_menu);
 

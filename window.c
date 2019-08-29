@@ -4,18 +4,24 @@
 
 #include "text.h"
 
+void fatal_exit_w_msg(const char* msg){
+	endwin();
+	fprintf(stderr, "%s\n", msg);
+	exit(1);
+}
+
 void exit_application(int stat){
 	endwin();
 	exit(stat);
 }
 
-int * get_std_height_length(){
-	int * return_size = malloc(3*sizeof(int));
+int *get_std_height_length(){
+	int *return_size = malloc(3*sizeof(int));
 	getmaxyx(stdscr, *return_size, *(return_size+1));
 	*(return_size+2) = '\0';
+	printw("%d, %d, %d\n", *return_size, *(return_size+1), *(return_size+2));
 	return return_size;
 }
-
 
 
 /* Creates the window in the given window structure pointer */
@@ -59,12 +65,12 @@ void start_curses(){
 
 // TODO: Finish text printing and determine optimal values for scaling
 int scaled_height(int scr_height){
-	if(scr_height < 18){
+	if(scr_height < 18 ){
 		return -1;
 	}
-	//	if(scr_height > 36){
-	//	return scr_height / 2;
-	//}
+	if(scr_height > 36){
+		return scr_height / 2;
+	}
 	return 9;
 }
 
@@ -72,9 +78,9 @@ int scaled_length(int scr_length){
 	if(scr_length < 82){
 		return -1;
 	}
-	//	if(scr_length > 164){
-	//	return scr_length / 2;
-	//}
+	if(scr_length > 164){
+		return scr_length / 2;
+	}
 	return 79;
 }
 
@@ -86,8 +92,7 @@ void configure_window(struct window *op_window){
 	// Makes sure screen is sufficient size
 	if(wdw_h == -1 || wdw_l == -1){
 		// TODO: write minimum x and y to resize to
-		printf("Please resize your terminal!\n");
-		exit_application(1);
+		fatal_exit_w_msg("Please resize your terminal!");
 	}
 
 	// Set the struct's parameters

@@ -116,7 +116,7 @@ char *generate_random_string(int gen_num){
 	
 	char *rdm_str = malloc(TEST_STR_SIZE*sizeof(char)+1);
 	int next_space = 3+(rand()%6);
-	for(int i = 0; i < TEST_STR_SIZE; i++){
+	for(int i = 0; i < TEST_STR_SIZE-1; i++){
 		switch(rand() % gen_num){
 		case 0:
 			// -1 the size, or '\0' will have a chance of appearing.
@@ -140,6 +140,7 @@ char *generate_random_string(int gen_num){
 			i++;
 		}
 	}
+	*(rdm_str+TEST_STR_SIZE-1) = ' ';
 	*(rdm_str+TEST_STR_SIZE) = '\0';
 	return rdm_str;
 }
