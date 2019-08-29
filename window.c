@@ -19,7 +19,6 @@ int *get_std_height_length(){
 	int *return_size = malloc(3*sizeof(int));
 	getmaxyx(stdscr, *return_size, *(return_size+1));
 	*(return_size+2) = '\0';
-	printw("%d, %d, %d\n", *return_size, *(return_size+1), *(return_size+2));
 	return return_size;
 }
 
@@ -63,25 +62,30 @@ void start_curses(){
 }
 
 
-// TODO: Finish text printing and determine optimal values for scaling
 int scaled_height(int scr_height){
-	if(scr_height < 18 ){
+	if(scr_height < 8 ){
 		return -1;
 	}
-	if(scr_height > 36){
-		return scr_height / 2;
+	if(scr_height < 15){
+		return scr_height;
 	}
-	return 9;
+	if(scr_height < 25){
+		return (int)((double)scr_height * 0.75);
+	}
+	return scr_height / 2;
 }
 
 int scaled_length(int scr_length){
-	if(scr_length < 82){
+	if(scr_length < 40){
 		return -1;
 	}
-	if(scr_length > 164){
-		return scr_length / 2;
+	if(scr_length < 60){
+		return scr_length;
 	}
-	return 79;
+	if(scr_length < 100){
+		return (int)((double)scr_length * 0.75);
+	}
+	return scr_length / 2;
 }
 
 void configure_window(struct window *op_window){
@@ -91,8 +95,7 @@ void configure_window(struct window *op_window){
 
 	// Makes sure screen is sufficient size
 	if(wdw_h == -1 || wdw_l == -1){
-		// TODO: write minimum x and y to resize to
-		fatal_exit_w_msg("Please resize your terminal!");
+		fatal_exit_w_msg("terminal requirements: >= 40 columns and >= 8 lines");
 	}
 
 	// Set the struct's parameters
