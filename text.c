@@ -5,6 +5,7 @@
 
 #include "window.h"
 #include "text.h"
+#include "stat.h"
 
 void set_fonts(int theme){ // TODO: Allow different themes
 	switch(theme){
@@ -67,12 +68,17 @@ void print_typing_string(struct window *op_window){
 }
 
 void print_test_string(struct window *op_window, char * str){
-	mvwaddch(op_window->window_p, 4, 0, *(str));
-	int i = 1;
-	while(*(str+i) != '\0'){
-		waddch(op_window->window_p, *(str+i));
-		i++;
-	}
+	wmove(op_window->window_p, op_window->start_curs_y, 0);
+	wprintw(op_window->window_p, "%s", str);
+
+	// This used to be how it worked, leaving here just in case.
+	//	int i = 0;
+	//	int pgstop = op_window->length*op_window->height;
+	/* while(*(str+i) != '\0' || i <= pgstop-6){ */
+	/* 	addch(*(str+i)); */
+	/* 	waddch(op_window->window_p, *(str+i)); */
+	/* 	i++; */
+	/* } */
 }
 
 void redraw_char(struct window *op_window, const char test_char,	\
@@ -163,3 +169,4 @@ void print_results(struct window *op_window, int t, int avg_t, int wpm, \
 	
 	show_window(op_window);
 }
+

@@ -35,6 +35,37 @@ int isquitkey(char in){
 	return (in == 24);
 }
 
+// Clears the string part of the typing window
+void clearstr(struct window *win){
+	wmove(win->window_p, win->start_curs_y, win->start_curs_x);
+	for(int y = win->start_curs_y; y <= win->height; y++){
+		for(int x = win->start_curs_x; x <= win->length; x++){
+			waddch(win->window_p, ' ');
+		}
+	}
+}
+
+
+void scrolltxtdown(struct keystat *stat, struct window *win, int p){
+	clearstr(win);
+	wmove(win->window_p, win->start_curs_y, win->start_curs_x);
+	// TODO redo this poop code
+	// Prints the first line with correctness coloring
+	for(int i = win->length; i > 0; i--){
+		redraw_char(win, *(stat->test_str+p-i),		\
+					(stat->char_input[p-i] == *(stat->test_str+(p-i))));
+	}
+	
+	wprintw(win->window_p, "%s", stat->test_str+p);
+	wmove(win->window_p, win->start_curs_y+1, win->start_curs_x);
+
+	// Gives us the rows
+	// stat->test-str_size / win->length
+	// Start printing from here?
+	// i - win->length-1
+}
+
+
 int test_string(struct keystat *instat){
 	// Set all backspace to 0
 	for(int i = 0; i < sizeof(instat->bs); i++){
@@ -47,8 +78,12 @@ int test_string(struct keystat *instat){
 	print_typing_string(&typing_window);
 	print_test_string(&typing_window, instat->test_str);
 	show_window(&typing_window);
-	wmove(typing_window.window_p, 4, 0);
+	wmove(typing_window.window_p, typing_window.start_curs_y, 0);
 
+	// Set numbers for when we need to scroll back
+	int scrollat = getshownchar(&typing_window);
+	int scrollbkat = 0;
+	
 	// Read the first character and initialize timings
 	char char_in = getch();
 	instat->char_input[0] = char_in;
@@ -100,11 +135,14 @@ int test_string(struct keystat *instat){
 		}
 		
 
+		
 		// Update the entire entered string
 		instat->entered_str[entr_i] = char_in;
 		entr_i++;
-		
 
+		if(i == scrollat){
+			scrolltxtdown(instat, &typing_window, i);
+		}
 		wrefresh(typing_window.window_p);
 
 

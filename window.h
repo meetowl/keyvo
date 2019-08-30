@@ -21,6 +21,8 @@ struct window{
 
 void exit_application(int stat);
 
+//int getscrollstate(struct window win);
+	
 int *get_std_height_length();
 
 void create_w(struct window *op_window);
@@ -37,4 +39,5 @@ void configure_window(struct window *op_window);
 
 void show_window(struct window *op_window);
 
+int getshownchar(struct window *op_window);
 #endif
