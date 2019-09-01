@@ -1,4 +1,4 @@
-* TODO Scroll functionality
+* DONE Scroll functionality
   [[./window.c][window.c]]
   - Needs scrollback as well
   - Make sure to make obvious that text goes beyond page
@@ -6,7 +6,6 @@
 * TODO Most commonly mistaken letter
   - Scan the input string to search for the most commonly backspaced /
     incorrectly entered  string
-  - Also, see which 
 * TODO Allow user settable test string size
   - Perhaps make a preferences screen?
 * TODO Bugfixes
@@ -15,7 +14,7 @@
   - Setting large str size segfaults
 * TODO Small usability/design tweaks
   - Make p and q menu entries appear at the bottom
-* Code cleanup
+* TODO Code cleanup
 ** TODO Reorganize headers
    - Currently, cyclic dependencies 
      (i.e. b.h:"#include a.h" -> a.h:"#include b.h")
@@ -28,18 +27,25 @@
      or not.
    - Could be used in test_string() and scrolltxtdown(), as currently
      boiler plate code is in there
-** TODO redo poop code in scrolltxtdown()
-   - EWW gross gross gross gross
+** TODO Split up test_string()
 * TODO make typing string its own window
   - Life would be easier if you had a buffered window just for the
     typing string
   - No more overhead or start_curs_y
-* TODO make scrolling better
-  - You should do [[make typing string its own window][this]] before you implement this
-  - Currently, you're rewriting the entire thing.
-  - What if we just "pushed" from one row to another?
-  - mvwaddch(y-1, x-1, win, c) and look if you can save the
-	attributes of each character (i.e. green or red)
-  - Perhaps have a buffer that stores the whole text?
-  - Faster? Slower? Think about it.
+* TODO make scrolling better (?)
+  +- You should do [[make typing string its own window][this]] before you implement this+
+  +- Currently, you're rewriting the entire thing.+
+  +- What if we just "pushed" from one row to another?+
+  +- mvwaddch(y-1, x-1, win, c) and look if you can save the+
+  +attributes of each character (i.e. green or red)+
+  +- Perhaps have a buffer that stores the whole text?+
+  +- Faster? Slower? Think about it.+
+  - Above is /probably/ slower/as fast because you have to do things char by
+    char rather than just printing the whole string.
+  - You should instead determine when the text should scroll down and up
+  - This too, will benefit greatly if you implement [[make typing string its own window][this]] first
+* TODO Create a way to store analysis/settings/previous selection
+* TODO Create seperate window for analysis screen
+  - The user may want to see their typed out text alongside their
+    stats. 
 

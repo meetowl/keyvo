@@ -49,8 +49,7 @@ void clearstr(struct window *win){
 void scrolltxtdown(struct keystat *stat, struct window *win, int p){
 	clearstr(win);
 	wmove(win->window_p, win->start_curs_y, win->start_curs_x);
-	// TODO redo this poop code
-	// Prints the first line with correctness coloring
+	// Print the first formatted line
 	for(int i = win->length; i > 0; i--){
 		redraw_char(win, *(stat->test_str+p-i),		\
 					(stat->char_input[p-i] == *(stat->test_str+(p-i))));
@@ -58,11 +57,17 @@ void scrolltxtdown(struct keystat *stat, struct window *win, int p){
 	
 	wprintw(win->window_p, "%s", stat->test_str+p);
 	wmove(win->window_p, win->start_curs_y+1, win->start_curs_x);
+}
 
-	// Gives us the rows
-	// stat->test-str_size / win->length
-	// Start printing from here?
-	// i - win->length-1
+void scrolltxtup(struct keystat *stat, struct window *win, int p){
+	clearstr(win);
+	wmove(win->window_p, win->start_curs_y, win->start_curs_x);
+	int i; 
+	for(i = getshownchar(win)-1; i > 0 ; i--){
+		redraw_char(win, *(stat->test_str+p-i), \
+					(stat->char_input[p-i] == *(stat->test_str+(p-i))));
+	}
+	redraw_char(win, *(stat->test_str+p-i),	2);
 }
 
 
@@ -134,14 +139,18 @@ int test_string(struct keystat *instat){
 			return 1;
 		}
 		
-
-		
 		// Update the entire entered string
 		instat->entered_str[entr_i] = char_in;
 		entr_i++;
 
 		if(i == scrollat){
 			scrolltxtdown(instat, &typing_window, i);
+			scrollat += getshownchar(&typing_window);
+			scrollbkat += getshownchar(&typing_window) -1 ; 
+		}else if(i == scrollbkat && i > 0){
+			scrolltxtup(instat, &typing_window, i);
+			scrollat -= getshownchar(&typing_window);
+			scrollbkat -= getshownchar(&typing_window) - 1;
 		}
 		wrefresh(typing_window.window_p);
 

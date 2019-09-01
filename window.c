@@ -63,7 +63,6 @@ void start_curses(){
 
 
 int scaled_height(int scr_height){
-	return 8;
 	if(scr_height < 8 ){
 		return -1;
 	}
@@ -77,7 +76,6 @@ int scaled_height(int scr_height){
 }
 
 int scaled_length(int scr_length){
-	return 40;
 	if(scr_length < 40){
 		return -1;
 	}
@@ -119,8 +117,3 @@ int getshownchar(struct window *win){
 	return win->length * (win->height - win->start_curs_y);
 }
 
-/* int getscrollstate(struct window win){ */
-/* 	int y, x; */
-/* 	getyx(win->window_p, y, x); */
-	
-/* } */
