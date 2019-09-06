@@ -3,9 +3,10 @@
   - Needs scrollback as well
   - Make sure to make obvious that text goes beyond page
   - I don't think scroll() or scrl() can help us here
-* TODO Most commonly mistaken letter
+* DONE Most commonly mistaken letter
   - Scan the input string to search for the most commonly backspaced /
     incorrectly entered  string
+  - Create a torture test if qwerty/dvorak mistakes are found
 * TODO Allow user settable test string size
   - Perhaps make a preferences screen?
 * TODO Bugfixes
@@ -19,8 +20,12 @@
    - Currently, cyclic dependencies 
      (i.e. b.h:"#include a.h" -> a.h:"#include b.h")
 	 are a pretty gosh darn big problem
+   - Double emphasis on this because OMW YOU ARE IN HEADER HELL
 ** TODO Reformat code 
    - Your currently have 300 different styles in this code, stop it.
+   - Think of better names for your methods/variables/structs because
+     they're pretty ambiguous/misleading.
+   - Many of your parameters have different names, make those consistent.
 ** TODO create universal character redrawer
    - Your redraw_char() should check whether character is correct by
      itself, rather than the outside telling it whether it's a space
@@ -45,7 +50,8 @@
   - You should instead determine when the text should scroll down and up
   - This too, will benefit greatly if you implement [[make typing string its own window][this]] first
 * TODO Create a way to store analysis/settings/previous selection
-* TODO Create seperate window for analysis screen
+* TODO Create seperate window(s) for analysis screen
   - The user may want to see their typed out text alongside their
-    stats. 
+    stats.
+  - Create another optional window for the most mistaken letters
 

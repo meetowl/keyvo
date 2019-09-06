@@ -153,6 +153,7 @@ char *generate_random_string(int gen_num){
 
 void print_results(struct window *op_window, int t, int avg_t, int wpm, \
 				   double acc, double acc_fx, int mstks, int mstks_fx){
+				   //				   struct mistakes *mlist){
 	const char line0[] = "Test finished!";
 
 	WINDOW *win = op_window->window_p;
@@ -166,7 +167,26 @@ void print_results(struct window *op_window, int t, int avg_t, int wpm, \
 	mvwprintw(win, 5, 0, "Accuracy fixed:        %10.2f%%", acc_fx);
 	mvwprintw(win, 6, 0, "Mistakes total:        %10d", mstks);
 	mvwprintw(win, 7, 0, "Mistakes fixed:        %10d", mstks_fx);
-	
+
+	/* switch (mlist->maxindex) { */
+	/* case -1: */
+	/* 	// Make sure nothing weird happens */
+	/* 	break; */
+	/* case 0: */
+	/* 	mvwprintw(win, 8, 0, "Most mistaken:     %10c:%d",	\ */
+	/* 			  mlist->list[0]->correctc, mlist->list[0]->count); */
+	/* 	break; */
+	/* case 2: */
+	/* 	mvwprintw(win, 8, 0, "Most mistaken:     %10c:%d;%10c:%d",	\ */
+	/* 			  mlist->list[0]->correctc, mlist->list[0]->count, */
+	/* 			  mlist->list[1]->correctc, mlist->list[1]->count); */
+	/* 	break; */
+	/* default: */
+	/* 	mvwprintw(win, 8, 0, "Most mistaken:     %10c:%d; %c:%d; %c:%d;",	\ */
+	/* 			  mlist->list[0]->correctc, mlist->list[0]->count, */
+	/* 			  mlist->list[1]->correctc, mlist->list[1]->count, */
+	/* 			  mlist->list[2]->correctc, mlist->list[2]->count); */
+
 	show_window(op_window);
 }
 

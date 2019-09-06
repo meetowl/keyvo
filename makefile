@@ -1,4 +1,4 @@
-CFLAGS = -Wall -lncurses
+CFLAGS = -Wall -lncurses -g
 keyvo : main.o input.o stat.o text.o window.o
 	cc $(CFLAGS) -o keyvo main.o input.o stat.o text.o window.o
 

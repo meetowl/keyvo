@@ -21,6 +21,7 @@ struct window{
 
 void exit_application(int stat);
 
+void fatal_exit_w_msg(const char* msg);
 //int getscrollstate(struct window win);
 	
 int *get_std_height_length();

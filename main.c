@@ -1,11 +1,11 @@
 /* Typing practice written by meetowl in C */
 #include "stat.h"
 #include "input.h"
+#include <sys/types.h>
+#include <unistd.h>
 
 int main(){
 	start_curses();
-
-	
 	
 	struct window welcome_menu;
 	configure_window(&welcome_menu);

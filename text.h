@@ -3,7 +3,8 @@
 
 #include "window.h"
 
-#define TEST_STR_SIZE 256
+
+#define TEST_STR_SIZE 128
 #define AVG_WORD_SIZE 8
 
 void set_fonts(int theme);
@@ -21,6 +22,7 @@ char *generate_random_string(int gen_num);
 
 void print_results(struct window *op_window, int t, int avg_t, int wpm, \
 				   double acc, double acc_fx, int mstks, int mstks_fx);
+				   //		   struct mistakes *mlist);
 
 
 #endif
