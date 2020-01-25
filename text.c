@@ -98,33 +98,24 @@ void print_test_string(struct window *op_window, char * str){
 	wprintw(op_window->window_p, "%s", str);
 }
 
-void redraw_char(struct window *op_window, const char test_char,	\
-				 const char in_correct){
-	switch(in_correct){
-	case 0:
-		if(test_char == ' '){
-			waddch(op_window->window_p, test_char | WRONG_HL);
-		}else{
-			waddch(op_window->window_p, test_char | WRONG_L);
+void redraw_char(struct window *op_window, const char out,	\
+				 const char in){
+	if (is_backspace(in)) {
+		if (out == ' ') {
+			waddch(op_window->window_p, out | REWRITE_HL);
+		} else {
+			waddch(op_window->window_p, out | REWRITE_L);
 		}
-		break;
-	case 1:
-		waddch(op_window->window_p, test_char | CORRECT_L);
-		break;
-	case 2:
-		// Special case when need to backspace
-		if(test_char == ' '){
-			waddch(op_window->window_p, test_char | REWRITE_HL);		
-		}else{
-			waddch(op_window->window_p, test_char | REWRITE_L);
+	} else {
+		if (out == in) {
+			waddch(op_window->window_p, in | CORRECT_L);
+		} else {
+			if (out == ' ') {
+				waddch(op_window->window_p, out | WRONG_HL);
+			} else {
+				waddch(op_window->window_p, out | WRONG_L);
+			}
 		}
-		break;
-	default:
-		fprintf(stderr,											\
-				"error: incorrect option (%d) passed to redraw_char().\n", \
-				in_correct);
-		exit_application(1);
-		break;
 	}
 }
 

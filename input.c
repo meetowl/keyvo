@@ -9,15 +9,15 @@ void backspace_character(struct window *op_window, char rechar){
 	uint8_t y, x;
 	// Macro that determines the position of cursor
 	getyx(op_window->window_p, y, x);
-	if(x == 0){
-		if(y != op_window->init_cursor_row){
+	if (x == 0) {
+		if (y != op_window->init_cursor_row) {
 			wmove(op_window->window_p, y-1, op_window->max_columns-1);
-			redraw_char(op_window, rechar, 2);
+			redraw_char(op_window, rechar, '\b');
 			wmove(op_window->window_p, y-1, op_window->max_columns-1);
 		}
-	}else{
+	} else {
 		wmove(op_window->window_p, y, x-1);
-		redraw_char(op_window, rechar, 2);
+		redraw_char(op_window, rechar, '\b');
 		wmove(op_window->window_p, y, x-1);
 	}
 }
@@ -43,8 +43,8 @@ void scroll_text_down(struct keystat *stat, struct window *win, int p){
 	wmove(win->window_p, win->init_cursor_row, win->init_cursor_col);
 	// Print the first formatted line
 	for(int i = win->max_columns; i > 0; i--){
-		redraw_char(win, *(stat->test_str+p-i),		\
-					(stat->char_input[p-i] == *(stat->test_str+(p-i))));
+		redraw_char(win, (stat->test_str)[p-i],	(stat->char_input[p-i]));
+		//					(stat->char_input[p-i] == *(stat->test_str+(p-i))));
 	}
 	
 	wprintw(win->window_p, "%s", stat->test_str+p);
@@ -56,10 +56,10 @@ void scroll_text_up(struct keystat *stat, struct window *win, int p){
 	wmove(win->window_p, win->init_cursor_row, win->init_cursor_col);
 	int i; 
 	for(i = get_max_shown_char(win)-1; i > 0 ; i--){
-		redraw_char(win, *(stat->test_str+p-i), \
-					(stat->char_input[p-i] == *(stat->test_str+(p-i))));
+		redraw_char(win, *(stat->test_str+p-i), (stat->char_input[p-i]));
+		//					(stat->char_input[p-i] == *(stat->test_str+(p-i))));
 	}
-	redraw_char(win, *(stat->test_str+p-i),	2);
+	redraw_char(win, *(stat->test_str+p-i),	'\b');
 }
 
 // The most important function in this program.
@@ -81,7 +81,7 @@ int test_string(struct keystat *stat){
 	char char_in = getch();
 	stat->char_input[0] = char_in;
 	stat->entered_str[0] = char_in;
-	redraw_char(&typing_window, *stat->test_str, (char_in == *stat->test_str));
+	redraw_char(&typing_window, *stat->test_str, char_in);
 
 	// Everything to do with timing keypresses
 	struct timeval now_tv;
@@ -100,8 +100,8 @@ int test_string(struct keystat *stat){
 
 		// Within the character input range
 		if (char_in >= 32 && char_in <= 126) {
-			redraw_char(&typing_window, (stat->test_str)[i],	\
-						(char_in == (stat->test_str)[i]));
+			redraw_char(&typing_window, (stat->test_str)[i], char_in);
+						//						(char_in == (stat->test_str)[i]));
 
 			// Get current time (in milliseconds) and record it
 			gettimeofday(&now_tv, 0);
@@ -114,7 +114,7 @@ int test_string(struct keystat *stat){
 			i++;
 		} else if (is_backspace(char_in) && i > 0) {
 			i--;
-			backspace_character(&typing_window, *(stat->test_str+i));
+			backspace_character(&typing_window, (stat->test_str)[i]);
 				
 			// Don't mark as bs if correct initially
 			if(stat->char_input[i] != (stat->test_str)[i]){ 
@@ -143,3 +143,30 @@ int test_string(struct keystat *stat){
 	}
 	return 0;
 }
+
+	/* switch(in_correct){ */
+	/* case 0: */
+	/* 	if(test_char == ' '){ */
+	/* 		waddch(op_window->window_p, test_char | WRONG_HL); */
+	/* 	}else{ */
+	/* 		waddch(op_window->window_p, test_char | WRONG_L); */
+	/* 	} */
+	/* 	break; */
+	/* case 1: */
+	/* 	waddch(op_window->window_p, test_char | CORRECT_L); */
+	/* 	break; */
+	/* case 2: */
+	/* 	// Special case when need to backspace */
+	/* 	if(test_char == ' '){ */
+	/* 		waddch(op_window->window_p, test_char | REWRITE_HL);		 */
+	/* 	}else{ */
+	/* 		waddch(op_window->window_p, test_char | REWRITE_L); */
+	/* 	} */
+	/* 	break; */
+	/* default: */
+	/* 	fprintf(stderr,											\ */
+	/* 			"error: incorrect option (%d) passed to redraw_char().\n", \ */
+	/* 			in_correct); */
+	/* 	exit_application(1); */
+	/* 	break; */
+	/* } */
