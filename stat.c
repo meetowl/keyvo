@@ -4,7 +4,7 @@
 
 #include "stat.h"
 #include "window.h"
-
+#include "chars.h"
 
 #define LIST_SIZE 512
 struct mistake{
@@ -56,6 +56,7 @@ int getcharmstk(struct keystat *stat){
 	}
 	return mistaket;	
 }
+
 int getbsmstk(struct keystat *stat){
 	int mistaket = 0;
 	for (int i = 0; i < stat->test_str_size; i++){
@@ -148,19 +149,13 @@ void sortbycount(struct mistakes *mlist){
 	}
 }
 
-// TODO: fix this by rearranging headers
-int _isbackspace(char in){
-	// Most backspace character codes
-	return (in == 263 || in == 127 || in == 8 || in == 7);
-}
-
 struct mistakes *getwrongc(struct keystat *stats){
 	struct mistakes *mlist = initmistakes(LIST_SIZE);
 	int enti = 0;
 	int stri = 0;
 
 	while (stats->entered_str[enti] != '\0'){
-		if (_isbackspace(stats->entered_str[enti])) {
+		if (is_backspace(stats->entered_str[enti])) {
 			stri--;
 		} else if (stats->entered_str[enti] != stats->test_str[stri]) {
 			addmistake(stats->test_str[stri], mlist);
@@ -176,7 +171,7 @@ struct mistakes *getwrongc(struct keystat *stats){
 
 void display_results(struct keystat *stats){
 	struct window results_window;
-	configure_window(&results_window);
+	configure_centre_window(&results_window);
 	
 	int avg_t = getavgms(stats);
 	int t = stats->timings[stats->test_str_size-1]/1000;
@@ -213,7 +208,7 @@ void display_results(struct keystat *stats){
 				  mlist->list[2]->correctc, mlist->list[2]->count);
 		break;
 	}
-	show_window(&results_window);
+	wrefresh(results_window.window_p);
 
 	getchar();
 }

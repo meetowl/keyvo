@@ -13,10 +13,12 @@
 struct window{
 	WINDOW *window_p;
 	WINDOW *border_p;
-	int height;
-	int	length;
-	int start_curs_y;
-	int start_curs_x;
+	int max_rows;
+	int	max_columns;
+	int row;
+	int col;
+	int init_cursor_row;
+	int init_cursor_col;
 };
 
 void exit_application(int stat);
@@ -26,9 +28,9 @@ void fatal_exit_w_msg(const char* msg);
 	
 int *get_std_height_length();
 
-void create_w(struct window *op_window);
+//void create_w(struct window *op_window);
 
-void create_w_brdr(struct window *op_window);
+//void create_w_brdr(struct window *op_window);
 
 void start_curses();
 
@@ -36,7 +38,9 @@ int scaled_height(int scr_height);
 
 int scaled_length(int scr_length);
 
-void configure_window(struct window *op_window);
+void draw_box_around_win(struct window *);
+
+void configure_centre_window(struct window *op_window);
 
 void show_window(struct window *op_window);
 

@@ -27,29 +27,55 @@ void set_fonts(int theme){ // TODO: Allow different themes
 }
 
 void print_option_menu(struct window *op_window, char prev_slct){
-	const char line_0[] = "Welcome to Keyvo!";
-	const char line_1[] = "by meetowl";
-	const char line_2[] = "Pick an option:";
-	const char line_3[] = "1. Letters + Spaces";
-	const char line_4[] = "2. Letters + Numbers + Spaces";
-	const char line_5[] = "3. Letters + Numbers + Symbols + Spaces";
-	char *line_6 = malloc(27);
-	sprintf(line_6, "p: Previous selection (%c)", prev_slct);
-	const char line_7[] = "q: Quit application";
+	// Top of screen
+	const char welcome[] = "Welcome to Keyvo!";
+	const char directive[] = "Pick an option:";
+	const char opt1[] = "1. Generated string";
+	const char opt2[] = "2. Word mash";
+	const char opt3[] = "3. Paragraph";
+
+	// Bottom of screen
+	// (Previous selection entry is defined below)
+	const char pref[] = "o: Preferences";
+	const char quit[] = "q: Quit application";
 
 	WINDOW * win = op_window->window_p;
-	int win_l = op_window->length;
-	op_window->start_curs_y = 7;
-	op_window->start_curs_x = (win_l - strlen(line_7))/2 + strlen(line_7) + 1;
+	int win_c = op_window->max_columns;
+	int win_r = op_window->max_rows;
 	
-	mvwprintw(win, 0, (win_l - strlen(line_0))/2, "%s", line_0);
-	mvwprintw(win, 1, (win_l - strlen(line_1))/2, "%s", line_1);
-	mvwprintw(win, 2, (win_l - strlen(line_2))/2, "%s", line_2);
-	mvwprintw(win, 3, (win_l - strlen(line_3))/2, "%s", line_3);
-	mvwprintw(win, 4, (win_l - strlen(line_4))/2, "%s", line_4);
-	mvwprintw(win, 5, (win_l - strlen(line_5))/2, "%s", line_5);
-	mvwprintw(win, 6, (win_l - strlen(line_6))/2, "%s", line_6);
-	mvwprintw(win, 7, (win_l - strlen(line_7))/2, "%s", line_7);
+	mvwprintw(win, 0, (win_c - strlen(welcome))/2, "%s", welcome);
+	mvwprintw(win, 2, (win_c - strlen(directive))/2, "%s", directive);
+	mvwprintw(win, 3, (win_c - strlen(opt1))/2, "%s", opt1);
+	mvwprintw(win, 4, (win_c - strlen(opt2))/2, "%s", opt2);
+	mvwprintw(win, 5, (win_c - strlen(opt3))/2, "%s", opt3);
+
+	mvwprintw(win, (win_r-2), (win_c - strlen(pref))/2, "%s", pref);
+	mvwprintw(win, (win_r-1), (win_c - strlen(quit))/2, "%s", quit);
+
+	// If we didn't select anything prior, don't print previous selection text
+	if (prev_slct != 0) {
+		char *pselect = malloc(27);
+		sprintf(pselect, "p: Previous selection (%c)", prev_slct + '0');
+		mvwprintw(win, (win_r-3), (win_c - strlen(pselect))/2, "%s", pselect);
+		free(pselect);
+	}
+}
+
+void print_gen_menu(struct window *op_window){
+	const char subname[] = "Generated string";
+	const char directive[] = "Pick an option:";
+	const char opt1[] = "1. Letters only";
+	const char opt2[] = "2. Letters + Numbers";
+	const char opt3[] = "3. Letters + Numbers + Symbols";
+
+	WINDOW *win = op_window->window_p;
+	int win_l=op_window->max_columns;
+	
+	mvwprintw(win, 0, (win_l - strlen(subname))/2, "%s", subname);
+	mvwprintw(win, 2, (win_l - strlen(directive))/2, "%s", directive);
+	mvwprintw(win, 3, (win_l - strlen(opt1))/2, "%s", opt1);
+	mvwprintw(win, 4, (win_l - strlen(opt2))/2, "%s", opt2);
+	mvwprintw(win, 5, (win_l - strlen(opt3))/2, "%s", opt3);
 }
 
 void print_typing_string(struct window *op_window){
@@ -58,9 +84,9 @@ void print_typing_string(struct window *op_window){
 	const char line_2[] = "Ctrl-X to return to main menu";
 
 	WINDOW *win = op_window->window_p;
-	int win_l=op_window->length;
-	op_window->start_curs_y = 4;
-	op_window->start_curs_x = 0;
+	int win_l=op_window->max_columns;
+	op_window->init_cursor_row = 4;
+	op_window->init_cursor_col = 0;
 
 	mvwprintw(win, 0, (win_l - strlen(line_0))/2, "%s", line_0);
 	mvwprintw(win, 1, (win_l - strlen(line_1))/2, "%s", line_1);
@@ -68,12 +94,12 @@ void print_typing_string(struct window *op_window){
 }
 
 void print_test_string(struct window *op_window, char * str){
-	wmove(op_window->window_p, op_window->start_curs_y, 0);
+	wmove(op_window->window_p, op_window->init_cursor_row, 0);
 	wprintw(op_window->window_p, "%s", str);
 
 	// This used to be how it worked, leaving here just in case.
 	//	int i = 0;
-	//	int pgstop = op_window->length*op_window->height;
+	//	int pgstop = op_window->max_columns*op_window->max_rows;
 	/* while(*(str+i) != '\0' || i <= pgstop-6){ */
 	/* 	addch(*(str+i)); */
 	/* 	waddch(op_window->window_p, *(str+i)); */
@@ -110,12 +136,40 @@ void redraw_char(struct window *op_window, const char test_char,	\
 	}
 }
 
-char *generate_random_string(int gen_num){
-	const char char_array[] = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQq"	\
-		"RrSsTtUuWwXxYyZz";
-	const char number_array[] = "1234567890";
-	const char symbol_array[] = "~`!@#$%^&*(){[}]+=?/_-:;\\|\"'";
+test_type_t generate_category_wrt_type(test_type_t type) {
+	switch (type) {
+	case CHAR_BOTH:
+		return rand() % 2;
+	case CHAR_NUM:
+		return rand() % 3;
+	case CHAR_SYMBOL:
+		if (rand() % 2) return (rand() % 2);
+		else  		    return (3);
+	case NUM_SYMBOL:
+		return rand() % 2 + 2;
+	case CHAR_SYMBOL_NUM:
+		return rand() % 4;
+	default:
+		return type;
+	}
+}
 
+char generate_random_char_wrt_type(test_type_t type) {
+	const char symbol_array[] = "~`!@#$%^&*(){[}]+=?/_-:;\\|\"'";
+	switch(generate_category_wrt_type(type)){
+	case CHAR_LOWER_CASE:
+		return 97 + (rand() % 26);
+	case CHAR_UPPER_CASE:
+		return 65 + (rand() % 26);
+	case NUM:
+		return 48 + (rand() % 10);
+	case SYMBOL:
+		return symbol_array[rand() % (sizeof(symbol_array)-1)];
+	default:
+		return 0;
+	}	
+}
+char *generate_random_string(test_type_t type){
 	struct timeval rand_tv;
 	gettimeofday(&rand_tv, 0);
 	srand(rand_tv.tv_sec+rand_tv.tv_usec);
@@ -123,26 +177,10 @@ char *generate_random_string(int gen_num){
 	char *rdm_str = malloc(TEST_STR_SIZE*sizeof(char)+1);
 	int next_space = 3+(rand()%6);
 	for(int i = 0; i < TEST_STR_SIZE-1; i++){
-		switch(rand() % gen_num){
-		case 0:
-			// -1 the size, or '\0' will have a chance of appearing.
-			*(rdm_str+i) = char_array[rand() % \
-									  (sizeof(char_array)-1)];
-			break;
-		case 1:
-			*(rdm_str+i) = number_array[rand() %					\
-										(sizeof(number_array)-1)];
-
-			break;
-		case 2:
-			*(rdm_str+i) = symbol_array[rand() % \
-										(sizeof(symbol_array)-1)];
-			break;
-		}
-
+		rdm_str[i] = generate_random_char_wrt_type(type);
 		if(i+1 == next_space){
 			*(rdm_str+i+1) = ' ';
-			next_space = i + 3 + (rand() % 8);
+			next_space = i + 3 + (rand() % AVG_WORD_SIZE);
 			i++;
 		}
 	}
@@ -157,7 +195,7 @@ void print_results(struct window *op_window, int t, int avg_t, int wpm, \
 	const char line0[] = "Test finished!";
 
 	WINDOW *win = op_window->window_p;
-	int win_l = op_window->length;
+	int win_l = op_window->max_columns;
 
 	mvwprintw(win, 0, (win_l - strlen(line0))/2, "%s", line0);
 	mvwprintw(win, 1, 0, "Avg. Time / character: %10dms", avg_t);
@@ -187,6 +225,6 @@ void print_results(struct window *op_window, int t, int avg_t, int wpm, \
 	/* 			  mlist->list[1]->correctc, mlist->list[1]->count, */
 	/* 			  mlist->list[2]->correctc, mlist->list[2]->count); */
 
-	show_window(op_window);
+	wrefresh(op_window->window_p);
 }
 

@@ -15,37 +15,6 @@ void exit_application(int stat){
 	exit(stat);
 }
 
-int *get_std_height_length(){
-	int *return_size = malloc(3*sizeof(int));
-	getmaxyx(stdscr, *return_size, *(return_size+1));
-	*(return_size+2) = '\0';
-	return return_size;
-}
-
-
-/* Creates the window in the given window structure pointer */
-void create_w(struct window *op_window){
-	int *std_dim = get_std_height_length();
-	int win_start_h = (*std_dim/2) - (op_window->height/2);
-	int win_start_l = (*(std_dim+1)/2) - (op_window->length/2);
-	op_window->window_p = newwin(op_window->height, op_window->length,	\
-								 win_start_h, win_start_l);
-}
-
-/* Creates the window border in the given window structure pointer */
-void create_w_brdr(struct window *op_window){
-	int *std_dim = get_std_height_length();
-	
-	int border_h = op_window->height+3;
-	int border_l = op_window->length+3;
-	int border_start_h = *std_dim/2 - (op_window->height/2) - 1;
-	int border_start_l = *(std_dim+1)/2 - op_window->length/2 - 1;
-
-	op_window->border_p = newwin(border_h, border_l,				\
-								 border_start_h, border_start_l);
-	wborder(op_window->border_p, '|', '|', '_', '_', ' ', ' ', ' ', ' ');
-}
-
 void start_curses(){
 	initscr(); // Initialize curses
 	if(has_colors() == TRUE){
@@ -62,58 +31,65 @@ void start_curses(){
 }
 
 
-int scaled_height(int scr_height){
-	if(scr_height < 8 ){
+int scaled_rows(int screen_rows){
+	if(screen_rows < 8 ){
 		return -1;
 	}
-	if(scr_height < 15){
-		return scr_height;
+	if(screen_rows < 15){
+		return screen_rows;
 	}
-	if(scr_height < 25){
-		return (int)((double)scr_height * 0.75);
+	if(screen_rows < 25){
+		return (int)((double)screen_rows * 0.75);
 	}
-	return scr_height / 2;
+	return screen_rows / 2;
 }
 
-int scaled_length(int scr_length){
-	if(scr_length < 40){
+int scaled_columns(int screen_columns){
+	if(screen_columns < 40){
 		return -1;
 	}
-	if(scr_length < 60){
-		return scr_length;
+	
+	if(screen_columns < 60){
+		return screen_columns;
 	}
-	if(scr_length < 100){
-		return (int)((double)scr_length * 0.75);
+	
+	if(screen_columns < 100){
+		return (int)((double)screen_columns * 0.75);
 	}
-	return scr_length / 2;
+	
+	return screen_columns / 2;
 }
 
-void configure_window(struct window *op_window){
-	int *std_dim = get_std_height_length();
-	int wdw_h = scaled_height(*std_dim),		\
-		wdw_l = scaled_length(*(std_dim+1));
+void draw_box_around_win(struct window *win){
+	WINDOW *box = newwin(win->max_rows+2, win->max_columns+2, win->row-1, win->col-1);
+	box(box, '|', '_');
+	wrefresh(box);
+	delwin(box);
+	box = 0;
+}
 
-	// Makes sure screen is sufficient size
-	if(wdw_h == -1 || wdw_l == -1){
+void configure_centre_window(struct window *op_window){
+	int std_row = 0;
+	int std_col = 0;
+	getmaxyx(stdscr, std_row, std_col);
+
+	op_window->max_rows = scaled_rows(std_row);
+	op_window->max_columns = scaled_columns(std_col);
+	
+	if(op_window->max_rows == -1 || op_window->max_columns == -1){
 		fatal_exit_w_msg("terminal requirements: >= 40 columns and >= 8 lines");
 	}
-
-	// Set the struct's parameters
-	op_window ->length = wdw_l;
-	op_window->height = wdw_h;
-	create_w(op_window);
-	create_w_brdr(op_window);
-}
-
-void show_window(struct window *op_window){
-	refresh();
-	wrefresh(op_window->border_p);
-	wrefresh(op_window->window_p);
-	refresh();
+	
+	op_window->row = (std_row/2) - (op_window->max_rows/2);
+	op_window->col = (std_col/2) - (op_window->max_columns/2);
+	
+	op_window->window_p = newwin(op_window->max_rows, op_window->max_columns,	\
+								 op_window->row, op_window->col);
+	
 }
 
 // Get the total number of characters we can fit on screen
 int getshownchar(struct window *win){
-	return win->length * (win->height - win->start_curs_y);
+	return win->max_columns * (win->max_rows - win->init_cursor_row);
 }
 

@@ -1,28 +1,25 @@
 #include <sys/time.h>
 
+#include "chars.h"
 #include "stat.h"
 #include "text.h"
+
 
 void backspace_character(struct window *op_window, char rechar){
 	uint8_t y, x;
 	// Macro that determines the position of cursor
 	getyx(op_window->window_p, y, x);
 	if(x == 0){
-		if(y != op_window->start_curs_y){
-			wmove(op_window->window_p, y-1, op_window->length-1);
+		if(y != op_window->init_cursor_row){
+			wmove(op_window->window_p, y-1, op_window->max_columns-1);
 			redraw_char(op_window, rechar, 2);
-			wmove(op_window->window_p, y-1, op_window->length-1);
+			wmove(op_window->window_p, y-1, op_window->max_columns-1);
 		}
 	}else{
 		wmove(op_window->window_p, y, x-1);
 		redraw_char(op_window, rechar, 2);
 		wmove(op_window->window_p, y, x-1);
 	}
-}
-
-int isbackspace(char in){
-	// Most backspace character codes
-	return (in == 263 || in == 127 || in == 8 || in == 7);
 }
 
 int isregenkey(char in){
@@ -37,9 +34,9 @@ int isquitkey(char in){
 
 // Clears the string part of the typing window
 void clearstr(struct window *win){
-	wmove(win->window_p, win->start_curs_y, win->start_curs_x);
-	for(int y = win->start_curs_y; y <= win->height; y++){
-		for(int x = win->start_curs_x; x <= win->length; x++){
+	wmove(win->window_p, win->init_cursor_row, win->init_cursor_col);
+	for(int y = win->init_cursor_row; y <= win->max_rows; y++){
+		for(int x = win->init_cursor_col; x <= win->max_columns; x++){
 			waddch(win->window_p, ' ');
 		}
 	}
@@ -48,20 +45,20 @@ void clearstr(struct window *win){
 
 void scrolltxtdown(struct keystat *stat, struct window *win, int p){
 	clearstr(win);
-	wmove(win->window_p, win->start_curs_y, win->start_curs_x);
+	wmove(win->window_p, win->init_cursor_row, win->init_cursor_col);
 	// Print the first formatted line
-	for(int i = win->length; i > 0; i--){
+	for(int i = win->max_columns; i > 0; i--){
 		redraw_char(win, *(stat->test_str+p-i),		\
 					(stat->char_input[p-i] == *(stat->test_str+(p-i))));
 	}
 	
 	wprintw(win->window_p, "%s", stat->test_str+p);
-	wmove(win->window_p, win->start_curs_y+1, win->start_curs_x);
+	wmove(win->window_p, win->init_cursor_row+1, win->init_cursor_col);
 }
 
 void scrolltxtup(struct keystat *stat, struct window *win, int p){
 	clearstr(win);
-	wmove(win->window_p, win->start_curs_y, win->start_curs_x);
+	wmove(win->window_p, win->init_cursor_row, win->init_cursor_col);
 	int i; 
 	for(i = getshownchar(win)-1; i > 0 ; i--){
 		redraw_char(win, *(stat->test_str+p-i), \
@@ -79,11 +76,12 @@ int test_string(struct keystat *instat){
 	
 	// Configure the window
 	struct window typing_window;
-	configure_window(&typing_window);
+	configure_centre_window(&typing_window);
 	print_typing_string(&typing_window);
 	print_test_string(&typing_window, instat->test_str);
-	show_window(&typing_window);
-	wmove(typing_window.window_p, typing_window.start_curs_y, 0);
+	wrefresh(typing_window.window_p);
+	
+	wmove(typing_window.window_p, typing_window.init_cursor_row, 0);
 
 	// Set numbers for when we need to scroll back
 	int scrollat = getshownchar(&typing_window);
@@ -125,7 +123,7 @@ int test_string(struct keystat *instat){
 			instat->char_input[i] = char_in;
 			
 			i++;
-		} else if (isbackspace(char_in) && i > 0) {
+		} else if (is_backspace(char_in) && i > 0) {
 			i--;
 			backspace_character(&typing_window, *(instat->test_str+i));
 				

@@ -1,0 +1,65 @@
+
+chars.c,22
+int is_backspace(1,0
+
+input.c,177
+void backspace_character(8,80
+int isregenkey(25,589
+int isquitkey(30,653
+void clearstr(36,766
+void scrolltxtdown(46,1036
+void scrolltxtup(59,1496
+int test_string(71,1853
+
+main.c,16
+int main(7,127
+
+stat.c,635
+#define LIST_SIZE 9,117
+struct mistake{mistake10,139
+	char correctc;11,155
+	char enteredc[enteredc12,171
+	int count;13,198
+	int maxenteredindex;14,210
+struct mistakes{mistakes17,236
+	struct mistake *list[list18,253
+	int maxindex;19,287
+	int size;20,302
+int getavgms(24,318
+int getwpm(32,518
+int getmistakes(40,715
+int getcharmstk(50,942
+int getbsmstk(60,1143
+int binaryfind(71,1324
+int insert(91,1685
+void insertandsort(103,1947
+void addmistake(120,2373
+struct mistakes *initmistakes(initmistakes129,2544
+void sortbycount(139,2794
+struct mistakes *getwrongc(getwrongc152,3102
+void display_results(172,3537
+
+test.c,15
+int main(5,61
+
+text.c,361
+void set_fonts(10,141
+void print_option_menu(29,970
+void print_gen_menu(64,2258
+void print_typing_string(81,2917
+void print_test_string(96,3445
+void redraw_char(110,3894
+test_type_t generate_category_wrt_type(139,4573
+char generate_random_char_wrt_type(157,4926
+char *generate_random_string(generate_random_string172,5331
+void print_results(192,5860
+
+window.c,233
+void fatal_exit_w_msg(7,80
+void exit_application(13,175
+void start_curses(18,235
+int scaled_rows(34,560
+int scaled_columns(47,779
+void draw_box_around_win(63,1029
+void configure_centre_window(71,1223
+int getshownchar(92,1897
