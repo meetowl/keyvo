@@ -96,15 +96,6 @@ void print_typing_string(struct window *op_window){
 void print_test_string(struct window *op_window, char * str){
 	wmove(op_window->window_p, op_window->init_cursor_row, 0);
 	wprintw(op_window->window_p, "%s", str);
-
-	// This used to be how it worked, leaving here just in case.
-	//	int i = 0;
-	//	int pgstop = op_window->max_columns*op_window->max_rows;
-	/* while(*(str+i) != '\0' || i <= pgstop-6){ */
-	/* 	addch(*(str+i)); */
-	/* 	waddch(op_window->window_p, *(str+i)); */
-	/* 	i++; */
-	/* } */
 }
 
 void redraw_char(struct window *op_window, const char test_char,	\
@@ -121,6 +112,7 @@ void redraw_char(struct window *op_window, const char test_char,	\
 		waddch(op_window->window_p, test_char | CORRECT_L);
 		break;
 	case 2:
+		// Special case when need to backspace
 		if(test_char == ' '){
 			waddch(op_window->window_p, test_char | REWRITE_HL);		
 		}else{

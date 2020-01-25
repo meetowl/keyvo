@@ -68,7 +68,7 @@ void draw_box_around_win(struct window *win){
 	box = 0;
 }
 
-void configure_centre_window(struct window *op_window){
+void init_centre_window(struct window *op_window){
 	int std_row = 0;
 	int std_col = 0;
 	getmaxyx(stdscr, std_row, std_col);
@@ -89,7 +89,7 @@ void configure_centre_window(struct window *op_window){
 }
 
 // Get the total number of characters we can fit on screen
-int getshownchar(struct window *win){
+int get_max_shown_char(struct window *win){
 	return win->max_columns * (win->max_rows - win->init_cursor_row);
 }
 

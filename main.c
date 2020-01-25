@@ -8,13 +8,13 @@ int main(){
 	start_curses();
 	refresh();
 	struct window welcome_menu;
-	configure_centre_window(&welcome_menu);
+	init_centre_window(&welcome_menu);
 	draw_box_around_win(&welcome_menu);
 	
 	// Start of what the user interacts with 
 	char option_slct = 0;
 	char prev_slct = 0;
-	while(option_slct != 'q' - '0'){
+	while(option_slct != 'q'){
 		// Show window, take input
 		print_option_menu(&welcome_menu, prev_slct);
 		wrefresh(welcome_menu.window_p);
@@ -31,12 +31,13 @@ int main(){
 		}
 
 		struct keystat current_stats;
+		init_keystat(&current_stats);
 		current_stats.test_str = generate_random_string(option_slct);
 		current_stats.test_str_size = TEST_STR_SIZE;
 		werase(welcome_menu.window_p);
-		int fincode = test_string(&current_stats);
+		int fin_code = test_string(&current_stats);
 
-		if(fincode == 0){
+		if(fin_code == 0){
 			display_results(&current_stats);
 		}
 

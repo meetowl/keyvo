@@ -14,4 +14,5 @@ struct keystat{
 
 void display_results(struct keystat *stats);
 
+void init_keystat(struct keystat *stats);
 #endif

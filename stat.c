@@ -21,7 +21,13 @@ struct mistakes{
 };
 
 
-int getavgms(struct keystat *stats){
+void init_keystat(struct keystat *stats) {
+	// Zero out backspace array
+	for(int i = 0; i < sizeof(stats->bs); i++){
+		stats->bs[i] = 0;
+	}
+}
+int get_avg_ms(struct keystat *stats){
 	uint64_t sum_t = 0;
 	for(int i = 1; i < stats->test_str_size; i++){
 		sum_t += stats->timings[i] - stats->timings[i-1];
@@ -29,7 +35,7 @@ int getavgms(struct keystat *stats){
 	return sum_t/stats->test_str_size;
 }
 
-int getwpm(int strlen, int avgms){
+int get_words_per_minute(int strlen, int avgms){
 	int ttime = avgms * strlen;
 	double wpms = ((double)ttime)/((double)strlen/(double)AVG_WORD_SIZE);
 	double wps = 1000.0/wpms;
@@ -37,32 +43,20 @@ int getwpm(int strlen, int avgms){
 	return wpm;
 }
 
-int getmistakes(struct keystat *stat){
-	int mistaket = 0;
-	for (int i = 0; i < stat->test_str_size; i++){
-		if (stat->bs[i] ||									\
-			stat->char_input[i] != *(stat->test_str+i)){
-			mistaket++;
+int get_total_mistakes_wrt_chars(struct keystat *stats){
+	int mistake_total = 0;
+	for (int i = 0; i < stats->test_str_size; i++){
+		if (stats->char_input[i] != *(stats->test_str+i)){
+			mistake_total++;
 		}
 	}
-	return mistaket;
-}
-int getcharmstk(struct keystat *stat){
-	int mistaket = 0;
-	for (int i = 0; i < stat->test_str_size; i++){
-		if (stat->char_input[i] != *(stat->test_str+i)){
-			mistaket++;
-		}
-	}
-	return mistaket;	
+	return mistake_total;	
 }
 
-int getbsmstk(struct keystat *stat){
+int get_total_mistakes_wrt_backspace(struct keystat *stats){
 	int mistaket = 0;
-	for (int i = 0; i < stat->test_str_size; i++){
-		if (stat->bs[i]){
-			mistaket += stat->bs[i];
-		}
+	for (int i = 0; i < stats->test_str_size; i++){
+		mistaket += stats->bs[i];
 	}
 	return mistaket;
 }
@@ -88,10 +82,10 @@ int binaryfind(char c, struct mistakes *mlist){
 	return -1;
 }
 
-int insert(char c, struct mistakes *mlist){
-	if (mlist->maxindex+1 < mlist->size) {
-		mlist->maxindex++;
-		struct mistake *tmp = mlist->list[mlist->maxindex];
+int insert(char c, struct mistakes *mistake_list){
+	if (mistake_list->maxindex+1 < mistake_list->size) {
+		mistake_list->maxindex++;
+		struct mistake *tmp = mistake_list->list[mistake_list->maxindex];
 		tmp->correctc = c;
 		tmp->count = 1;
 		return 0;
@@ -100,115 +94,123 @@ int insert(char c, struct mistakes *mlist){
 	return -1;
 }
 
-void insertandsort(char c, struct mistakes *mlist){
-	int exitcode = insert(c, mlist);
+void insert_and_sort(char c, struct mistakes *mistake_list){
+	int exitcode = insert(c, mistake_list);
 	if (exitcode < 0){
 		fatal_exit_w_msg("mistake array size is too small!");
 		return;
 	}
 
-	// Second loop of insertion sort
-	int j = mlist->maxindex;
-	while (j > 0 && mlist->list[j-1]->correctc > mlist->list[j]->correctc) {
-		struct mistake *tmp = mlist->list[j];
-		mlist->list[j] = mlist->list[j-1];
-		mlist->list[j-1] = tmp;
+	// insertion sort
+	int j = mistake_list->maxindex;
+	while (j > 0 &&														\
+		   mistake_list->list[j-1]->correctc >							\
+		   mistake_list->list[j]->correctc) {
+		struct mistake *tmp = mistake_list->list[j];
+		mistake_list->list[j] = mistake_list->list[j-1];
+		mistake_list->list[j-1] = tmp;
 		j--;
 	}
 }
 
-void addmistake(char c, struct mistakes *mlist){
-	int pos = binaryfind(c, mlist);
-	if (pos >= 0) {
-		mlist->list[pos]->count++;
-	} else {
-		insertandsort(c, mlist);
+void add_mistake(char c, struct mistakes *mistake_list){
+	int pos = binaryfind(c, mistake_list);
+	if (pos >= 0) { 
+		mistake_list->list[pos]->count++;
+	} else { 
+		insert_and_sort(c, mistake_list);
 	}
 }
 
-struct mistakes *initmistakes(int size){
-	struct mistakes *mlist = malloc(sizeof(struct mistakes));
-	mlist->maxindex = -1;
-	mlist->size = size;
+struct mistakes *init_mistake_list(int size){
+	struct mistakes *mistake_list = malloc(sizeof(struct mistakes));
+	mistake_list->maxindex = -1;
+	mistake_list->size = size;
 	for (int i = 0; i < size; i++) {
-		mlist->list[i] = malloc(sizeof(struct mistake));
+		mistake_list->list[i] = malloc(sizeof(struct mistake));
 	}
-	return mlist;
+	return mistake_list;
 }
-
-void sortbycount(struct mistakes *mlist){
-	for (int i = 1; i <= mlist->maxindex; i++) {
+                                                                                
+void sort_by_count(struct mistakes *mistake_list){
+	for (int i = 1; i <= mistake_list->maxindex; i++) {
 		int j = i;
 		while (j > 0 &&							\
-			   mlist->list[j-1]->count < mlist->list[j]->count) {
-			struct mistake *tmp = mlist->list[j];
-			mlist->list[j] = mlist->list[j-1];
-			mlist->list[j-1] = tmp;
+			   mistake_list->list[j-1]->count < mistake_list->list[j]->count) {
+			printw("yeah");
+			struct mistake *tmp = mistake_list->list[j];
+			mistake_list->list[j] = mistake_list->list[j-1];
+			mistake_list->list[j-1] = tmp;
 			j--;
 		}
 	}
 }
 
-struct mistakes *getwrongc(struct keystat *stats){
-	struct mistakes *mlist = initmistakes(LIST_SIZE);
-	int enti = 0;
-	int stri = 0;
+struct mistakes *get_error_chars(struct keystat *stats){
+	struct mistakes *mistake_list = init_mistake_list(LIST_SIZE);
+	int entered_i = 0;
+	int str_i = 0;
 
-	while (stats->entered_str[enti] != '\0'){
-		if (is_backspace(stats->entered_str[enti])) {
-			stri--;
-		} else if (stats->entered_str[enti] != stats->test_str[stri]) {
-			addmistake(stats->test_str[stri], mlist);
-			stri++;
+	while (stats->entered_str[entered_i] != '\0'){
+		if (is_backspace(stats->entered_str[entered_i])) {
+	 		str_i--;
+		} else if (stats->entered_str[entered_i] != stats->test_str[str_i]) {
+			add_mistake(stats->test_str[str_i], mistake_list);
+			str_i++;
 		} else {
-			stri++;
+			str_i++;
 		}
-		enti++;
+		entered_i++;
 	}
-	sortbycount(mlist);
-	return mlist;
+	sort_by_count(mistake_list);
+	return mistake_list;
 }
 
 void display_results(struct keystat *stats){
 	struct window results_window;
-	configure_centre_window(&results_window);
+	init_centre_window(&results_window);
 	
-	int avg_t = getavgms(stats);
-	int t = stats->timings[stats->test_str_size-1]/1000;
-	int wpm = getwpm(stats->test_str_size, avg_t);
-	int mstk = getcharmstk(stats) + getbsmstk(stats);
-	int mstk_fxd = getbsmstk(stats);
-	double acc = ((double)(stats->test_str_size-mstk))/((double)stats->test_str_size);
-	double acc_fxd = ((double)(stats->test_str_size-getcharmstk(stats))) / \
-		((double) (stats->test_str_size));
-	acc *= 100;
-	acc_fxd *= 100;
-	struct mistakes *mlist = getwrongc(stats);
+	int avg_time = get_avg_ms(stats);
+	int time = stats->timings[stats->test_str_size-1]/1000;
+	int words_per_minute = get_words_per_minute(stats->test_str_size, avg_time);
+	int mistakes_fixed = get_total_mistakes_wrt_backspace(stats);
+	int mistakes_remaining =  get_total_mistakes_wrt_chars(stats);
+	int mistakes_all = mistakes_remaining + mistakes_fixed;
+	double accuracy =													\
+		((double)(stats->test_str_size - mistakes_all)) /				\
+		((double)stats->test_str_size);
+	double accuracy_fixed =												\
+		((double)(stats->test_str_size - mistakes_remaining) /			\
+		 ((double) (stats->test_str_size)));
+	accuracy *= 100;
+	accuracy_fixed *= 100;
+	struct mistakes *mistake_list = get_error_chars(stats);
 	// TODO: screen for mistakes
-	print_results(&results_window, t, avg_t, wpm, acc, acc_fxd, mstk, mstk_fxd);
+	print_results(&results_window, time, avg_time, words_per_minute, \
+				  accuracy, accuracy_fixed, mistakes_all, mistakes_fixed);
 
 	// Yes, I know this is awful, I will fix this later with a whole different representation.
-	switch (mlist->maxindex) {
+	switch (mistake_list->maxindex) {
 	case -1:
 		// Make sure nothing weird happens
 		break;
 	case 0:
 		mvwprintw(results_window.window_p, 8, 0, "Most mistaken:     %10c:%d",	\
-				  mlist->list[0]->correctc, mlist->list[0]->count);
+				  mistake_list->list[0]->correctc, mistake_list->list[0]->count);
 		break;
 	case 2:
 		mvwprintw(results_window.window_p, 8, 0, "Most mistaken:     %10c:%d;%10c:%d",	\
-				  mlist->list[0]->correctc, mlist->list[0]->count,		\
-				  mlist->list[1]->correctc, mlist->list[1]->count);
+				  mistake_list->list[0]->correctc, mistake_list->list[0]->count,		\
+				  mistake_list->list[1]->correctc, mistake_list->list[1]->count);
 		break;
 	default:
 		mvwprintw(results_window.window_p, 8, 0, "Most mistaken:     %10c:%d; %c:%d; %c:%d;",	\
-				  mlist->list[0]->correctc, mlist->list[0]->count,		\
-				  mlist->list[1]->correctc, mlist->list[1]->count,		\
-				  mlist->list[2]->correctc, mlist->list[2]->count);
+				  mistake_list->list[0]->correctc, mistake_list->list[0]->count,		\
+				  mistake_list->list[1]->correctc, mistake_list->list[1]->count,		\
+				  mistake_list->list[2]->correctc, mistake_list->list[2]->count);
 		break;
 	}
-	wrefresh(results_window.window_p);
 
+	wrefresh(results_window.window_p);
 	getchar();
 }

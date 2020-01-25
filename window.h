@@ -40,9 +40,9 @@ int scaled_length(int scr_length);
 
 void draw_box_around_win(struct window *);
 
-void configure_centre_window(struct window *op_window);
+void init_centre_window(struct window *op_window);
 
 void show_window(struct window *op_window);
 
-int getshownchar(struct window *op_window);
+int get_max_shown_char(struct window *op_window);
 #endif
